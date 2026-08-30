@@ -16,7 +16,7 @@ const Navbar = () => {
             <span className="navbar-brand mb-0 h1 d-lg-none">🐄 Kurra's Dairy</span>
             <div className="ms-auto d-flex align-items-center">
                 <span className="text-light me-3">
-                    Welcome, <strong>{user?.name}</strong> ({user?.role})
+                    Welcome, <strong>{user?.name}</strong> (<span className="user-role-badge">{user?.role}</span>)
                 </span>
                 <button onClick={handleLogout} className="btn btn-outline-light btn-sm">
                     Logout
