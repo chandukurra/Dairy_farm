@@ -126,6 +126,7 @@ exports.getAdminDashboard = async (req, res, next) => {
 exports.getManagerDashboard = async (req, res, next) => {
     try {
         const startOfDay = getStartOfDay();
+        const startOfMonth = getStartOfMonth();
 
         // Managers only need to see daily operational metrics, not monthly financial overviews
         const milkToday = await MilkProduction.aggregate([
@@ -134,12 +135,19 @@ exports.getManagerDashboard = async (req, res, next) => {
         ]);
         const milkInsights = await getMilkInsights();
 
+        const [milkMonth, totalAnimals] = await Promise.all([
+            MilkProduction.aggregate([
+                { $match: { productionDate: { $gte: startOfMonth } } },
+                { $group: { _id: null, total: { $sum: '$totalQuantity' } } }
+            ]),
+            Animal.countDocuments({ status: 'ACTIVE' })
+        ]);
+
         const salesToday = await Sale.aggregate([
             { $match: { saleDate: { $gte: startOfDay } } }, // Can see pending sales too
             { $group: { _id: null, total: { $sum: "$totalAmount" } } }
         ]);
 
-        const totalAnimals = await Animal.countDocuments({ status: 'ACTIVE' });
         const pendingChecks = await Verification.countDocuments({ status: 'PENDING' });
 
         res.status(200).json({
@@ -147,7 +155,7 @@ exports.getManagerDashboard = async (req, res, next) => {
             data: {
                 totalAnimals,
                 milkToday: milkToday[0]?.total || 0,
-                milk: milkInsights,
+                milk: { ...milkInsights, month: milkMonth[0]?.total || 0 },
                 salesToday: salesToday[0]?.total ? parseFloat(salesToday[0].total.toString()) : 0,
                 pendingChecks
             }

@@ -4,21 +4,28 @@ import api from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import farmHero from '../../assets/dairy-login-background.png';
 import FarmInsights from '../../components/FarmInsights';
+import DashboardCard from '../../components/DashboardCard';
 
 const MilkList = () => {
     const { user } = useContext(AuthContext);
     const [milkRecords, setMilkRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [summary, setSummary] = useState(null);
 
     useEffect(() => {
         fetchMilkRecords();
-    }, []);
+    }, [user?.role]);
 
     const fetchMilkRecords = async () => {
         try {
-            const res = await api.get('/milk-production');
-            setMilkRecords(res.data.data);
+            const dashboardPath = user?.role === 'ADMIN' ? 'admin' : 'manager';
+            const [recordsResponse, dashboardResponse] = await Promise.all([
+                api.get('/milk-production'),
+                api.get(`/dashboard/${dashboardPath}`)
+            ]);
+            setMilkRecords(recordsResponse.data.data);
+            setSummary(dashboardResponse.data.data);
             setLoading(false);
         } catch (err) {
             setError('Failed to load milk records.');
@@ -49,6 +56,7 @@ const MilkList = () => {
             {error && <div className="alert alert-danger">{error}</div>}
 
             <div className="milk-grid">
+                <div className="milk-main-panel">
                 <div className="card milk-records-card shadow-sm">
                 <div className="card-body p-0 table-responsive">
                     <table className="table table-hover mb-0 text-center align-middle">
@@ -91,8 +99,15 @@ const MilkList = () => {
                         </tbody>
                     </table>
                 </div>
-            </div>
-                <FarmInsights milk={{ today: totalMilk, morning: morningMilk, evening: eveningMilk }} />
+                </div>
+                <div className="production-summary row mt-3">
+                    <DashboardCard title="Total Animals" value={summary?.animals?.total ?? summary?.totalAnimals ?? '—'} icon="🐄" bgColor="bg-primary" />
+                    <DashboardCard title="Today's Production" value={`${Number(summary?.milk?.today ?? totalMilk).toFixed(1)} L`} icon="🥛" bgColor="bg-success" />
+                    <DashboardCard title="Avg. Production" value={`${(Number(summary?.milk?.today ?? totalMilk) / Math.max(Number(summary?.animals?.total ?? summary?.totalAnimals ?? 0), 1)).toFixed(1)} L`} icon="📊" bgColor="bg-purple" />
+                    <DashboardCard title="This Month" value={`${Number(summary?.milk?.month ?? 0).toFixed(1)} L`} icon="📅" bgColor="bg-gold" />
+                </div>
+                </div>
+                <FarmInsights milk={summary?.milk || { today: totalMilk, morning: morningMilk, evening: eveningMilk }} />
             </div>
         </div>
     );
