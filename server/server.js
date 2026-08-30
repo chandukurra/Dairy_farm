@@ -26,6 +26,7 @@ const customerRoutes = require('./routes/customerRoutes'); // ✨ ADDED CUSTOMER
 const reportRoutes = require('./routes/reportRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
+const weatherRoutes = require('./routes/weatherRoutes');
 
 // Initialize Express App
 const app = express();
@@ -106,6 +107,7 @@ app.use('/api/customers', customerRoutes); // ✨ ADDED TO MOUNT ROUTERS
 app.use('/api/reports', reportRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/weather', weatherRoutes);
 
 
 // ==========================================

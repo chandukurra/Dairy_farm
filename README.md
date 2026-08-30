@@ -2,6 +2,18 @@
 
 A complete MERN Stack web application for managing a dairy farm, including animals, milk production, sales, expenses, income, inventory, users, verification, and analytics.
 
+## Farm weather setup
+
+The dashboard uses the free Open-Meteo weather API through the server, so no API key is needed. Add the following values to `server/.env`, then restart the server:
+
+```env
+FARM_LOCATION_NAME=Kurra Dairy Farm
+FARM_LATITUDE=17.3850
+FARM_LONGITUDE=78.4867
+```
+
+Use your farm's own decimal latitude and longitude. In Google Maps, right-click the farm's exact point and choose the coordinates to copy them. The first number is latitude; the second is longitude. For deployment, set the same three variables in your hosting provider's server environment settings and redeploy/restart the server.
+
 ---
 
 ## 🌟 Features

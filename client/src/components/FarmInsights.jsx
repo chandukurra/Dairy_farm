@@ -1,4 +1,37 @@
+import { useEffect, useState } from 'react';
+import api from '../services/api';
+
+const weatherDescription = (code) => {
+    if (code === 0) return 'Clear sky';
+    if ([1, 2, 3].includes(code)) return 'Partly cloudy';
+    if ([45, 48].includes(code)) return 'Foggy';
+    if ([51, 53, 55, 56, 57].includes(code)) return 'Drizzle';
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return 'Rain';
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return 'Snow';
+    if ([95, 96, 99].includes(code)) return 'Thunderstorms';
+    return 'Current conditions';
+};
+
 const FarmInsights = ({ milk = {} }) => {
+    const [weather, setWeather] = useState(null);
+    const [weatherError, setWeatherError] = useState('');
+
+    useEffect(() => {
+        let active = true;
+
+        const loadWeather = async () => {
+            try {
+                const response = await api.get('/weather/current');
+                if (active) setWeather(response.data.data);
+            } catch (error) {
+                if (active) setWeatherError(error.response?.data?.message || 'Weather data is temporarily unavailable.');
+            }
+        };
+
+        loadWeather();
+        return () => { active = false; };
+    }, []);
+
     const total = Number(milk.today || 0);
     const morning = Number(milk.morning || 0);
     const evening = Number(milk.evening || 0);
@@ -9,9 +42,10 @@ const FarmInsights = ({ milk = {} }) => {
         <aside className="farm-insights dashboard-insights">
             <div className="insights-title"><span>🌱</span><strong>Smart Farm Insights</strong><span>⋮</span></div>
             <div className="weather-card">
-                <div className="weather-heading"><span>⛅ Farm Weather</span><small>Connect weather API</small></div>
-                <strong>—°C</strong><p>Weather data appears once a farm location is configured.</p>
-                <div className="weather-meta"><span>💧 Humidity —</span><span>↝ Wind —</span><span>☂ Rain —</span></div>
+                <div className="weather-heading"><span>⛅ Farm Weather</span><small>{weather?.locationName || 'Farm location'}</small></div>
+                <strong>{weather ? `${Math.round(weather.temperature)}°C` : '—°C'}</strong>
+                <p>{weather ? weatherDescription(weather.weatherCode) : (weatherError || 'Loading current weather…')}</p>
+                <div className="weather-meta"><span>💧 Humidity {weather ? `${weather.humidity}%` : '—'}</span><span>↝ Wind {weather ? `${weather.windSpeed} km/h` : '—'}</span><span>☂ Rain {weather ? `${weather.precipitation} mm` : '—'}</span></div>
             </div>
             <div className="production-card">
                 <div className="section-label">🥛 Today's Milk Production <span>Live</span></div>

@@ -23,3 +23,9 @@ services:
         sync: false
       - key: CLIENT_URL
         sync: false
+      - key: FARM_LOCATION_NAME
+        sync: false
+      - key: FARM_LATITUDE
+        sync: false
+      - key: FARM_LONGITUDE
+        sync: false
