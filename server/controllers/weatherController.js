@@ -7,7 +7,7 @@ const CACHE_DURATION_MS = 15 * 60 * 1000;
 let weatherCache = null;
 let weatherRequest = null;
 
-const fetchWeather = async (latitude, longitude) => {
+const fetchOpenMeteoWeather = async (latitude, longitude) => {
     const query = new URLSearchParams({
         latitude,
         longitude,
@@ -24,7 +24,41 @@ const fetchWeather = async (latitude, longitude) => {
 
     const data = await response.json();
     if (!data.current) throw new Error('Weather service did not return current conditions');
-    return data.current;
+    return {
+        temperature: data.current.temperature_2m,
+        humidity: data.current.relative_humidity_2m,
+        windSpeed: data.current.wind_speed_10m,
+        precipitation: data.current.precipitation,
+        weatherCode: data.current.weather_code,
+        updatedAt: data.current.time
+    };
+};
+
+const fetchMetNoWeather = async (latitude, longitude) => {
+    const response = await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${latitude}&lon=${longitude}`, {
+        headers: { 'User-Agent': 'KurraDairyFarm/1.0 (farm weather dashboard)' }
+    });
+
+    if (!response.ok) {
+        const error = new Error(`Backup weather service responded with ${response.status}`);
+        error.status = response.status;
+        throw error;
+    }
+
+    const data = await response.json();
+    const current = data.properties?.timeseries?.[0];
+    const details = current?.data?.instant?.details;
+    if (!details) throw new Error('Backup weather service did not return current conditions');
+
+    const symbol = current.data.next_1_hours?.summary?.symbol_code || 'Current conditions';
+    return {
+        temperature: details.air_temperature,
+        humidity: details.relative_humidity,
+        windSpeed: details.wind_speed,
+        precipitation: current.data.next_1_hours?.details?.precipitation_amount || 0,
+        description: symbol.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+        updatedAt: current.time
+    };
 };
 
 // @desc    Get current weather for the configured farm location
@@ -45,7 +79,8 @@ exports.getCurrentWeather = async (req, res) => {
         const now = Date.now();
         if (!weatherCache || weatherCache.latitude !== latitude || weatherCache.longitude !== longitude || now - weatherCache.cachedAt >= CACHE_DURATION_MS) {
             if (!weatherRequest) {
-                weatherRequest = fetchWeather(latitude, longitude)
+                weatherRequest = fetchOpenMeteoWeather(latitude, longitude)
+                    .catch(() => fetchMetNoWeather(latitude, longitude))
                     .then((current) => {
                         weatherCache = { latitude, longitude, current, cachedAt: Date.now() };
                         return current;
@@ -61,12 +96,7 @@ exports.getCurrentWeather = async (req, res) => {
             success: true,
             data: {
                 locationName: process.env.FARM_LOCATION_NAME || 'Farm location',
-                temperature: current.temperature_2m,
-                humidity: current.relative_humidity_2m,
-                windSpeed: current.wind_speed_10m,
-                precipitation: current.precipitation,
-                weatherCode: current.weather_code,
-                updatedAt: current.time
+                ...current
             }
         });
     } catch (error) {

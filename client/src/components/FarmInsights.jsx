@@ -44,7 +44,7 @@ const FarmInsights = ({ milk = {} }) => {
             <div className="weather-card">
                 <div className="weather-heading"><span>⛅ Farm Weather</span><small>{weather?.locationName || 'Farm location'}</small></div>
                 <strong>{weather ? `${Math.round(weather.temperature)}°C` : '—°C'}</strong>
-                <p>{weather ? weatherDescription(weather.weatherCode) : (weatherError || 'Loading current weather…')}</p>
+                <p>{weather ? (weather.description || weatherDescription(weather.weatherCode)) : (weatherError || 'Loading current weather…')}</p>
                 <div className="weather-meta"><span>💧 Humidity {weather ? `${weather.humidity}%` : '—'}</span><span>↝ Wind {weather ? `${weather.windSpeed} km/h` : '—'}</span><span>☂ Rain {weather ? `${weather.precipitation} mm` : '—'}</span></div>
             </div>
             <div className="production-card">
