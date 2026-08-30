@@ -14,9 +14,9 @@ const Sidebar = () => {
     const base = getBaseRoute();
 
     return (
-        <div className="bg-dark text-white vh-100 p-3" style={{ width: '250px', position: 'sticky', top: 0 }}>
-            <h4 className="text-center mb-4 d-none d-lg-block border-bottom pb-2">
-                🐄 Kurra's Dairy
+        <aside className="app-sidebar text-white vh-100 p-3" style={{ width: '270px', position: 'sticky', top: 0 }}>
+            <h4 className="sidebar-brand text-center mb-4 d-none d-lg-block pb-3">
+                <span className="brand-icon">🐄</span> Kurra's Dairy
             </h4>
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
@@ -54,7 +54,7 @@ const Sidebar = () => {
                     </>
                 )}
             </ul>
-        </div>
+        </aside>
     );
 };
 

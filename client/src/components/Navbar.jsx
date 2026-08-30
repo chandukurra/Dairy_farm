@@ -12,7 +12,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-4 shadow-sm">
+        <nav className="app-navbar navbar navbar-expand-lg navbar-dark px-4">
             <span className="navbar-brand mb-0 h1 d-lg-none">🐄 Kurra's Dairy</span>
             <div className="ms-auto d-flex align-items-center">
                 <span className="text-light me-3">

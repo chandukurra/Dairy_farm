@@ -55,7 +55,7 @@ import UserForm from './pages/admin/UserForm';
 function App() {
   return (
     <Router>
-      <div className="app-container bg-light min-vh-100">
+      <div className="app-container min-vh-100">
         <Routes>
           {/* -------------------------------------- */}
           {/* PUBLIC ROUTES                          */}
