@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import DashboardCard from '../../components/DashboardCard';
+import FarmInsights from '../../components/FarmInsights';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -26,7 +27,8 @@ const AdminDashboard = () => {
     if (error) return <div className="alert alert-danger m-4">{error}</div>;
 
     return (
-        <div>
+        <div className="dashboard-grid">
+          <div className="dashboard-main">
             <h2 className="mb-4">Admin Dashboard</h2>
 
             {/* Animal Statistics */}
@@ -55,6 +57,8 @@ const AdminDashboard = () => {
                 <DashboardCard title="Today's Expenses" value={`₹${stats.finance.expensesToday}`} icon="💸" bgColor="bg-danger" />
                 <DashboardCard title="Monthly Expenses" value={`₹${stats.finance.expensesMonth}`} icon="💸" bgColor="bg-danger" />
             </div>
+          </div>
+          <FarmInsights milk={stats.milk} />
         </div>
     );
 };

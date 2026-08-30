@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import DashboardCard from '../../components/DashboardCard';
+import FarmInsights from '../../components/FarmInsights';
 
 const ManagerDashboard = () => {
     const [stats, setStats] = useState(null);
@@ -27,7 +28,8 @@ const ManagerDashboard = () => {
     if (error) return <div className="alert alert-danger m-4">{error}</div>;
 
     return (
-        <div>
+        <div className="dashboard-grid">
+          <div className="dashboard-main">
             <h2 className="mb-4">🚜 Operations Dashboard</h2>
 
             <div className="row">
@@ -55,6 +57,8 @@ const ManagerDashboard = () => {
                     </div>
                 </div>
             </div>
+          </div>
+          <FarmInsights milk={stats.milk} />
         </div>
     );
 };

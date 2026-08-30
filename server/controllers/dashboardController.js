@@ -52,6 +52,7 @@ exports.getAdminDashboard = async (req, res, next) => {
             { $match: { productionDate: { $gte: startOfMonth } } },
             { $group: { _id: null, total: { $sum: "$totalQuantity" } } }
         ]);
+        const milkInsights = await getMilkInsights();
 
         // 3. Financials - Sales (Today & Month) - Only Verified
         const salesToday = await Sale.aggregate([
@@ -96,7 +97,10 @@ exports.getAdminDashboard = async (req, res, next) => {
                 },
                 milk: {
                     today: milkToday[0]?.total || 0,
-                    month: milkMonth[0]?.total || 0
+                    month: milkMonth[0]?.total || 0,
+                    morning: milkInsights.morning,
+                    evening: milkInsights.evening,
+                    history: milkInsights.history
                 },
                 finance: {
                     salesToday: salesToday[0]?.total ? parseFloat(salesToday[0].total.toString()) : 0,
@@ -128,6 +132,7 @@ exports.getManagerDashboard = async (req, res, next) => {
             { $match: { productionDate: { $gte: startOfDay } } },
             { $group: { _id: null, total: { $sum: "$totalQuantity" } } }
         ]);
+        const milkInsights = await getMilkInsights();
 
         const salesToday = await Sale.aggregate([
             { $match: { saleDate: { $gte: startOfDay } } }, // Can see pending sales too
@@ -142,6 +147,7 @@ exports.getManagerDashboard = async (req, res, next) => {
             data: {
                 totalAnimals,
                 milkToday: milkToday[0]?.total || 0,
+                milk: milkInsights,
                 salesToday: salesToday[0]?.total ? parseFloat(salesToday[0].total.toString()) : 0,
                 pendingChecks
             }
@@ -149,4 +155,32 @@ exports.getManagerDashboard = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+const getStartOfLastSevenDays = () => {
+    const d = getStartOfDay();
+    d.setDate(d.getDate() - 6);
+    return d;
+};
+
+const getMilkInsights = async () => {
+    const startOfDay = getStartOfDay();
+    const startOfLastSevenDays = getStartOfLastSevenDays();
+    const [today, history] = await Promise.all([
+        MilkProduction.aggregate([
+            { $match: { productionDate: { $gte: startOfDay } } },
+            { $group: { _id: null, total: { $sum: '$totalQuantity' }, morning: { $sum: '$morningQuantity' }, evening: { $sum: '$eveningQuantity' } } }
+        ]),
+        MilkProduction.aggregate([
+            { $match: { productionDate: { $gte: startOfLastSevenDays } } },
+            { $group: { _id: { $dateToString: { format: '%d %b', date: '$productionDate' } }, total: { $sum: '$totalQuantity' } } },
+            { $sort: { _id: 1 } }
+        ])
+    ]);
+    return {
+        today: today[0]?.total || 0,
+        morning: today[0]?.morning || 0,
+        evening: today[0]?.evening || 0,
+        history: history.map((item) => ({ label: item._id, total: item.total }))
+    };
 };
