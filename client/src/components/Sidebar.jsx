@@ -14,7 +14,7 @@ const Sidebar = () => {
     const base = getBaseRoute();
 
     return (
-        <aside className="app-sidebar text-white vh-100 p-3" style={{ width: '270px', position: 'sticky', top: 0 }}>
+        <aside className="app-sidebar text-white min-vh-100 p-3" style={{ width: '270px', position: 'sticky', top: 0 }}>
             <h4 className="sidebar-brand text-center mb-4 d-none d-lg-block pb-3">
                 <span className="brand-icon">🐄</span> Kurra's Dairy
             </h4>
