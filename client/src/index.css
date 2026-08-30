@@ -136,7 +136,11 @@ code {
 .farm-login-card .form-control { min-height: 46px; }
 
 /* Premium dark dashboard styling */
+html, body, #root { min-height: 100%; background: #080c0f; }
+body { min-height: 100vh; }
 .app-container, .app-shell { background: radial-gradient(circle at 72% -12%, rgba(23, 139, 102, .18), transparent 33rem), radial-gradient(circle at 100% 100%, rgba(37, 99, 235, .13), transparent 28rem), #080c0f; color: #d8e3e8; }
+.app-container { min-height: 100vh; }
+.app-shell { min-height: 100vh !important; align-items: stretch; }
 .app-sidebar { flex: 0 0 270px; background: linear-gradient(180deg, #11191d 0%, #0b1013 100%) !important; border-right: 1px solid rgba(148, 163, 184, .14); box-shadow: 12px 0 35px rgba(0, 0, 0, .18); z-index: 2; }
 .sidebar-brand { color: #f8fafc; font-size: 1.45rem; font-weight: 750; letter-spacing: -.025em; border-bottom: 1px solid rgba(148, 163, 184, .18); }
 .brand-icon { display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-right: .35rem; border-radius: .65rem; font-size: 1.25rem; background: linear-gradient(135deg, #2dd4bf, #2563eb); box-shadow: 0 7px 18px rgba(37, 99, 235, .25); }
