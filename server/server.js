@@ -1,5 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
+const jwt = require('jsonwebtoken');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -27,9 +30,13 @@ const reportRoutes = require('./routes/reportRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const weatherRoutes = require('./routes/weatherRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const User = require('./models/User');
+const { setNotificationSocket } = require('./services/notificationService');
 
 // Initialize Express App
 const app = express();
+const httpServer = http.createServer(app);
 
 // Connect to MongoDB
 connectDB();
@@ -108,6 +115,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 
 // ==========================================
@@ -161,7 +169,30 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+const io = new Server(httpServer, {
+    cors: { origin: allowedOrigins, credentials: true },
+    transports: ['websocket', 'polling']
+});
+
+io.use(async (socket, next) => {
+    try {
+        const token = socket.handshake.auth?.token;
+        if (!token) return next(new Error('Authentication required'));
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('_id role status');
+        if (!user || user.status !== 'ACTIVE') return next(new Error('Authentication required'));
+        socket.user = user;
+        next();
+    } catch (error) { next(new Error('Authentication required')); }
+});
+
+io.on('connection', (socket) => {
+    socket.join(`user:${socket.user.id}`);
+    socket.join(`role:${socket.user.role}`);
+});
+setNotificationSocket(io);
+
+const server = httpServer.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
 

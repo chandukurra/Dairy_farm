@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { notifyRoles } = require('../services/notificationService');
 
 // Helper function to generate JWT
 const generateToken = (id) => {
@@ -27,6 +28,13 @@ exports.register = async (req, res, next) => {
         });
 
         const token = generateToken(user._id);
+
+        await notifyRoles(['ADMIN'], {
+            title: 'New customer registration',
+            message: `${user.name} created a customer account.`,
+            type: 'INFO',
+            link: '/admin/customers'
+        });
 
         res.status(201).json({
             success: true,

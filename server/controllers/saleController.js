@@ -1,6 +1,7 @@
 const Sale = require('../models/Sale'); // (Ensure this matches your actual Sale model filename)
 const User = require('../models/User');
 const Verification = require('../models/Verification');
+const { notifyUser } = require('../services/notificationService');
 
 // @desc    Get all milk sales
 // @route   GET /api/milk-sales
@@ -66,6 +67,7 @@ exports.createSale = async (req, res) => {
             submittedBy: req.user.id,
             status: 'PENDING'
         });
+        await notifyUser(customer, { title: 'New milk purchase recorded', message: `${numericQuantity} L of milk was added to your purchases.`, type: 'INFO', link: '/customer/purchases' });
 
         res.status(201).json({ success: true, data: sale });
     } catch (error) {

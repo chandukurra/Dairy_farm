@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
+const { notifyUser } = require('../services/notificationService');
 const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 
@@ -27,6 +28,12 @@ router.post('/', async (req, res, next) => {
             address,
             role: 'FARM_MANAGER',
             status: 'ACTIVE'
+        });
+        await notifyUser(user._id, {
+            title: 'Farm manager account ready',
+            message: 'Your account has been created. You can now manage daily farm operations.',
+            type: 'SUCCESS',
+            link: '/manager/dashboard'
         });
         res.status(201).json({ success: true, data: user });
     } catch (error) { next(error); }

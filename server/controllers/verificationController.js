@@ -5,6 +5,7 @@ const MilkProduction = require('../models/MilkProduction');
 const Sale = require('../models/Sale');
 const Inventory = require('../models/Inventory');
 const InventoryTransaction = require('../models/InventoryTransaction');
+const { notifyUser } = require('../services/notificationService');
 
 exports.getPendingVerifications = async (req, res, next) => {
     try {
@@ -60,6 +61,13 @@ exports.updateVerificationStatus = async (req, res, next) => {
                 if (!item) throw new Error('Inventory item not found or stock is no longer sufficient');
             }
         }
+
+        await notifyUser(verification.submittedBy, {
+            title: `${verification.recordType.replace(/_/g, ' ')} ${status.toLowerCase()}`,
+            message: status === 'APPROVED' ? 'Your submitted record has been approved.' : 'Your submitted record was rejected. Please review the remarks if provided.',
+            type: status === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+            link: verification.recordType === 'MILK_SALE' ? '/manager/sales' : '/manager/dashboard'
+        });
 
         res.status(200).json({ success: true, data: verification });
     } catch (error) {

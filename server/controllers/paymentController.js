@@ -1,6 +1,7 @@
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Sale = require('../models/Sale');
+const { notifyRoles, notifyUser } = require('../services/notificationService');
 
 // @desc    Record a payment
 // @route   POST /api/payments
@@ -24,6 +25,7 @@ exports.createPayment = async (req, res, next) => {
             if (!validSale) return res.status(400).json({ success: false, message: 'Sale does not belong to this customer' });
         }
         const payment = await Payment.create({ ...req.body, customer, amount: Number(amount), createdBy: req.user.id, paymentStatus: 'PENDING' });
+        await notifyRoles(['ADMIN', 'FARM_MANAGER'], { title: 'Payment submitted', message: `A payment of ₹${payment.amount} is waiting for review.`, type: 'ACTION', link: '/admin/payments' });
         
         res.status(201).json({ success: true, data: payment });
     } catch (error) {
@@ -67,6 +69,7 @@ exports.verifyPayment = async (req, res, next) => {
         if (!['VERIFIED', 'REJECTED'].includes(status)) return res.status(400).json({ success: false, message: 'Status must be VERIFIED or REJECTED' });
         const payment = await Payment.findOneAndUpdate({ _id: req.params.id, paymentStatus: 'PENDING' }, { paymentStatus: status }, { new: true, runValidators: true });
         if (!payment) return res.status(404).json({ success: false, message: 'Pending payment not found' });
+        await notifyUser(payment.customer, { title: `Payment ${status.toLowerCase()}`, message: `Your payment of ₹${payment.amount} was ${status.toLowerCase()}.`, type: status === 'VERIFIED' ? 'SUCCESS' : 'WARNING', link: '/customer/payments' });
         res.json({ success: true, data: payment });
     } catch (error) { next(error); }
 };
