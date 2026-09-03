@@ -56,33 +56,64 @@ const AnimalForm = () => {
         setSaving(true);
         setError(null);
 
-        // Use FormData for file uploads
-        const uploadData = new FormData();
-        const excludedKeys = ['image', '_id', '__v', 'createdAt', 'updatedAt', 'createdBy'];
-        Object.keys(formData).forEach(key => {
-            if (!excludedKeys.includes(key) && formData[key] !== null && formData[key] !== undefined) {
-                uploadData.append(key, formData[key]);
-            }
-        });
-        
-        if (imageFile) {
-            uploadData.append('image', imageFile);
-        }
-
         try {
-            // Override the default application/json header for this specific request
-            const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+            let uploadedImage = null;
+
+            // If a new image file is selected, upload directly to Cloudinary using backend-generated signature
+            if (imageFile) {
+                // 1. Get exact signature, timestamp, and folder from backend
+                const sigRes = await api.get('/animals/upload-signature');
+                const { signature, timestamp, folder, apiKey, cloudName } = sigRes.data.data;
+
+                // 2. Prepare Cloudinary FormData with exact timestamp & signature returned by backend
+                const cloudinaryData = new FormData();
+                cloudinaryData.append('file', imageFile);
+                cloudinaryData.append('api_key', apiKey);
+                cloudinaryData.append('timestamp', timestamp);
+                cloudinaryData.append('signature', signature);
+                cloudinaryData.append('folder', folder);
+
+                // 3. Direct upload to Cloudinary (native fetch to avoid sending API auth headers)
+                const cloudinaryRes = await fetch(
+                    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                    {
+                        method: 'POST',
+                        body: cloudinaryData
+                    }
+                );
+
+                const cloudinaryJson = await cloudinaryRes.json();
+                if (!cloudinaryRes.ok) {
+                    throw new Error(cloudinaryJson.error?.message || 'Failed to upload image to Cloudinary');
+                }
+
+                uploadedImage = {
+                    url: cloudinaryJson.secure_url,
+                    publicId: cloudinaryJson.public_id
+                };
+            }
+
+            // 4. Save animal data with image details to the backend
+            const payload = { ...formData };
+            const excludedKeys = ['_id', '__v', 'createdAt', 'updatedAt', 'createdBy'];
+            excludedKeys.forEach((key) => delete payload[key]);
+
+            if (uploadedImage) {
+                payload.image = uploadedImage;
+            } else if (!isEditMode && !payload.image) {
+                delete payload.image;
+            }
 
             if (isEditMode) {
-                await api.put(`/animals/${id}`, uploadData, config);
+                await api.put(`/animals/${id}`, payload);
             } else {
-                await api.post('/animals', uploadData, config);
+                await api.post('/animals', payload);
             }
             
             // Go back to previous page
             navigate(-1); 
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to save animal');
+            setError(err.response?.data?.message || err.message || 'Failed to save animal');
             setSaving(false);
         }
     };

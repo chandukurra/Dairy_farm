@@ -4,7 +4,8 @@ const {
     getAnimal,
     createAnimal,
     updateAnimal,
-    deleteAnimal
+    deleteAnimal,
+    getUploadSignature
 } = require('../controllers/animalController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -14,6 +15,9 @@ const router = express.Router();
 
 // Apply protection to all animal routes
 router.use(protect);
+
+// Upload signature endpoint (must come before /:id)
+router.get('/upload-signature', authorize('ADMIN', 'FARM_MANAGER'), getUploadSignature);
 
 router
     .route('/')
