@@ -46,6 +46,16 @@ const Navbar = () => {
                     {isDark ? '☀️' : '🌙'}
                 </button>
 
+                {/* Mobile Help Button */}
+                <button
+                    className="theme-toggle-btn d-lg-none"
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-support-center'))}
+                    aria-label="Help & Support"
+                    title="Help & Support"
+                >
+                    🎧
+                </button>
+
                 <div className="notification-menu">
                     <button className="notification-button" onClick={() => setShowNotifications((visible) => !visible)} aria-label="Notifications" aria-expanded={showNotifications}>
                         🔔{unreadCount > 0 && <b>{unreadCount > 9 ? '9+' : unreadCount}</b>}

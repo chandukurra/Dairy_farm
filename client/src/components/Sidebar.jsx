@@ -1,9 +1,17 @@
 import { NavLink } from 'react-router-dom';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import SupportCenterModal from './SupportCenterModal';
 
 const Sidebar = () => {
     const { user } = useContext(AuthContext);
+    const [isSupportOpen, setIsSupportOpen] = useState(false);
+
+    useEffect(() => {
+        const handleOpen = () => setIsSupportOpen(true);
+        window.addEventListener('open-support-center', handleOpen);
+        return () => window.removeEventListener('open-support-center', handleOpen);
+    }, []);
 
     const getBaseRoute = () => {
         if (user?.role === 'ADMIN') return '/admin';
@@ -62,10 +70,30 @@ const Sidebar = () => {
                     </>
                 )}
             </ul>
-            <div className="sidebar-help d-none d-lg-block">
+            <div
+                className="sidebar-help d-none d-lg-flex"
+                role="button"
+                tabIndex={0}
+                onClick={() => setIsSupportOpen(true)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setIsSupportOpen(true);
+                    }
+                }}
+                title="Click to open Help & Support Center"
+            >
                 <span>🎧</span>
-                <div><strong>Need help?</strong><small>Contact support</small></div>
+                <div>
+                    <strong>Need help?</strong>
+                    <small>Contact support</small>
+                </div>
             </div>
+
+            <SupportCenterModal
+                isOpen={isSupportOpen}
+                onClose={() => setIsSupportOpen(false)}
+            />
         </aside>
     );
 };
