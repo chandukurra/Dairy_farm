@@ -39,10 +39,10 @@ exports.register = async (req, res, next) => {
         res.status(201).json({
             success: true,
             token,
-            user: { id: user._id, name: user.name, role: user.role }
+            user: { id: user._id, _id: user._id, name: user.name, role: user.role }
         });
     } catch (error) {
-        next(error); // Passes to centralized error handler from Phase 1
+        next(error);
     }
 };
 
@@ -73,7 +73,7 @@ exports.login = async (req, res, next) => {
         res.status(200).json({
             success: true,
             token,
-            user: { id: user._id, name: user.name, role: user.role }
+            user: { id: user._id, _id: user._id, name: user.name, role: user.role }
         });
     } catch (error) {
         next(error);

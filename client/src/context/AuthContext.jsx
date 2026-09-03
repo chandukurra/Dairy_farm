@@ -15,7 +15,8 @@ export const AuthProvider = ({ children }) => {
             if (token) {
                 try {
                     const res = await api.get('/auth/me');
-                    setUser(res.data.data);
+                    const u = res.data.data;
+                    setUser(u ? { ...u, id: u._id, _id: u._id } : null);
                 } catch (err) {
                     localStorage.removeItem('token');
                     setUser(null);
@@ -32,7 +33,8 @@ export const AuthProvider = ({ children }) => {
             setError(null);
             const res = await api.post('/auth/login', { email, password });
             localStorage.setItem('token', res.data.token);
-            setUser(res.data.user);
+            const u = res.data.user;
+            setUser(u ? { ...u, id: u.id || u._id, _id: u._id || u.id } : null);
             return res.data.user.role; // Return role for routing
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed');
@@ -46,7 +48,8 @@ export const AuthProvider = ({ children }) => {
             setError(null);
             const res = await api.post('/auth/register', userData);
             localStorage.setItem('token', res.data.token);
-            setUser(res.data.user);
+            const u = res.data.user;
+            setUser(u ? { ...u, id: u.id || u._id, _id: u._id || u.id } : null);
             return res.data.user.role;
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed');

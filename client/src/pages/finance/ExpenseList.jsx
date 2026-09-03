@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { AuthContext } from '../../context/AuthContext';
 import DashboardHero from '../../components/DashboardHero';

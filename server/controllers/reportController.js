@@ -16,14 +16,14 @@ exports.getProfitLoss = async (req, res, next) => {
 
         // 2. Calculate Total Verified Other Income
         const otherIncome = await Income.aggregate([
-            { $match: { status: 'SETTLED' } },
+            { $match: { verificationStatus: 'VERIFIED' } },
             { $group: { _id: null, totalOtherIncome: { $sum: "$amount" } } }
         ]);
         const additionalIncome = otherIncome.length > 0 ? parseFloat(otherIncome[0].totalOtherIncome.toString()) : 0;
 
         // 3. Calculate Total Verified Expenses
         const expenses = await Expense.aggregate([
-            { $match: { verificationStatus: 'VERIFIED' } },
+            { $match: { status: 'SETTLED' } },
             { $group: { _id: null, totalExpense: { $sum: "$amount" } } }
         ]);
         const totalExpenses = expenses.length > 0 ? parseFloat(expenses[0].totalExpense.toString()) : 0;

@@ -24,7 +24,7 @@ const Sidebar = () => {
             </div>
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
-                    <NavLink to={`${base}/dashboard`} className="nav-link text-white" activeclassname="active">
+                    <NavLink to={`${base}/dashboard`} className="nav-link text-white">
                         <span className="nav-icon">⌂</span> Dashboard
                     </NavLink>
                 </li>

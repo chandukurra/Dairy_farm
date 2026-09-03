@@ -7,6 +7,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('@exortek/express-mongo-sanitize');
+const hpp = require('hpp');
 
 // Import Database Connection
 const connectDB = require('./config/db');
@@ -25,7 +27,7 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const inventoryTransactionRoutes = require('./routes/inventoryTransactionRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const chartRoutes = require('./routes/chartRoutes');
-const customerRoutes = require('./routes/customerRoutes'); // ✨ ADDED CUSTOMER ROUTES
+const customerRoutes = require('./routes/customerRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
@@ -65,6 +67,10 @@ app.use(cors({
 // Body parser (Read JSON data from requests)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Data sanitization against NoSQL query injection & parameter pollution
+app.use(mongoSanitize());
+app.use(hpp());
 
 // Global Rate Limiting (Prevent DDoS & Brute Force)
 const limiter = rateLimit({
@@ -110,13 +116,12 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/inventory-transactions', inventoryTransactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/charts', chartRoutes);
-app.use('/api/customers', customerRoutes); // ✨ ADDED TO MOUNT ROUTERS
+app.use('/api/customers', customerRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/notifications', notificationRoutes);
-
 
 // ==========================================
 // 3. ERROR HANDLING
@@ -161,7 +166,6 @@ app.use((err, req, res, next) => {
         stack: process.env.NODE_ENV === 'production' ? null : err.stack,
     });
 });
-
 
 // ==========================================
 // 4. SERVER INITIALIZATION

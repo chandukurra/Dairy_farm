@@ -25,7 +25,7 @@ const saleSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['PENDING', 'VERIFIED', 'PAID'],
+        enum: ['PENDING', 'VERIFIED', 'PAID', 'REJECTED'],
         default: 'PENDING'
     },
     recordedBy: {

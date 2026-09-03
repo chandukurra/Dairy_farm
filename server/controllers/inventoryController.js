@@ -1,4 +1,5 @@
 const Inventory = require('../models/Inventory');
+const InventoryTransaction = require('../models/InventoryTransaction');
 
 // @desc    Create a new inventory item type (Catalog entry)
 // @route   POST /api/inventory
@@ -74,6 +75,17 @@ exports.addStock = async (req, res, next) => {
         if (!item) {
             return res.status(404).json({ success: false, message: 'Inventory item not found' });
         }
+
+        // Create transaction record for audit traceability
+        await InventoryTransaction.create({
+            item: item._id,
+            transactionType: 'PURCHASE',
+            quantity: addedPieces,
+            description: req.body.description || 'Stock addition via inventory catalog',
+            date: Date.now(),
+            enteredBy: req.user.id,
+            verificationStatus: 'VERIFIED'
+        });
 
         res.status(200).json({ success: true, data: item });
     } catch (error) {

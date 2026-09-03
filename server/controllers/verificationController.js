@@ -5,6 +5,7 @@ const MilkProduction = require('../models/MilkProduction');
 const Sale = require('../models/Sale');
 const Inventory = require('../models/Inventory');
 const InventoryTransaction = require('../models/InventoryTransaction');
+const Payment = require('../models/Payment');
 const { notifyUser } = require('../services/notificationService');
 
 exports.getPendingVerifications = async (req, res, next) => {
@@ -60,6 +61,8 @@ exports.updateVerificationStatus = async (req, res, next) => {
                 );
                 if (!item) throw new Error('Inventory item not found or stock is no longer sufficient');
             }
+        } else if (verification.recordType === 'PAYMENT') {
+            await Payment.findByIdAndUpdate(verification.recordId, { paymentStatus: status === 'APPROVED' ? 'VERIFIED' : 'REJECTED' });
         }
 
         await notifyUser(verification.submittedBy, {

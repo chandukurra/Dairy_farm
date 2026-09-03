@@ -92,6 +92,8 @@ exports.updateAnimal = async (req, res, next) => {
             // Upload new image
             const result = await streamUpload(req);
             req.body.image = { url: result.secure_url, publicId: result.public_id };
+        } else if (typeof req.body.image === 'string' || !req.body.image) {
+            delete req.body.image;
         }
 
         animal = await Animal.findByIdAndUpdate(req.params.id, req.body, {

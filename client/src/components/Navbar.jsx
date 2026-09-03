@@ -2,14 +2,18 @@ import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const { notifications, unreadCount, markRead, markAllRead } = useContext(NotificationContext);
-    const { theme, toggleTheme, isDark } = useContext(ThemeContext);
+    const { toggleTheme, isDark } = useContext(ThemeContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const [showNotifications, setShowNotifications] = useState(false);
+
+    const isAdmin = user?.role === 'ADMIN' || location.pathname.startsWith('/admin');
+    const displayName = isAdmin ? 'Mani Chandu' : (user?.name || 'Farmer');
 
     const handleLogout = () => {
         logout();
@@ -30,7 +34,7 @@ const Navbar = () => {
             <button className="navbar-menu btn btn-link d-none d-lg-inline p-0" aria-label="Navigation menu">☰</button>
             <span className="navbar-brand mb-0 h1 d-lg-none">🐄 Kurra's Dairy</span>
             <div className="ms-auto d-flex align-items-center">
-                <div className="navbar-greeting d-none d-md-flex"><span>{isDark ? '🌙' : '☀️'}</span><div>Good day, <strong>{user?.name || 'Farmer'}</strong><small>{dateLabel}</small></div></div>
+                <div className="navbar-greeting d-none d-md-flex"><span>{isDark ? '🌙' : '☀️'}</span><div>Good day, <strong>{displayName}</strong>{isAdmin && <span className="admin-role-badge">(ADMIN)</span>}<small>{dateLabel}</small></div></div>
                 
                 {/* Theme Toggle Button */}
                 <button

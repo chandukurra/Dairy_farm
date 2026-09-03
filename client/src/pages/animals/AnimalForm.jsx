@@ -58,8 +58,9 @@ const AnimalForm = () => {
 
         // Use FormData for file uploads
         const uploadData = new FormData();
+        const excludedKeys = ['image', '_id', '__v', 'createdAt', 'updatedAt', 'createdBy'];
         Object.keys(formData).forEach(key => {
-            if (formData[key] !== null && formData[key] !== undefined) {
+            if (!excludedKeys.includes(key) && formData[key] !== null && formData[key] !== undefined) {
                 uploadData.append(key, formData[key]);
             }
         });
