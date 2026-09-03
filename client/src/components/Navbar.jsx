@@ -1,11 +1,13 @@
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { NotificationContext } from '../context/NotificationContext';
+import { ThemeContext } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
     const { notifications, unreadCount, markRead, markAllRead } = useContext(NotificationContext);
+    const { theme, toggleTheme, isDark } = useContext(ThemeContext);
     const navigate = useNavigate();
     const [showNotifications, setShowNotifications] = useState(false);
 
@@ -28,7 +30,18 @@ const Navbar = () => {
             <button className="navbar-menu btn btn-link d-none d-lg-inline p-0" aria-label="Navigation menu">☰</button>
             <span className="navbar-brand mb-0 h1 d-lg-none">🐄 Kurra's Dairy</span>
             <div className="ms-auto d-flex align-items-center">
-                <div className="navbar-greeting d-none d-md-flex"><span>☀️</span><div>Good day, <strong>{user?.name || 'Farmer'}</strong><small>{dateLabel}</small></div></div>
+                <div className="navbar-greeting d-none d-md-flex"><span>{isDark ? '🌙' : '☀️'}</span><div>Good day, <strong>{user?.name || 'Farmer'}</strong><small>{dateLabel}</small></div></div>
+                
+                {/* Theme Toggle Button */}
+                <button
+                    className="theme-toggle-btn"
+                    onClick={toggleTheme}
+                    aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+                    title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+                >
+                    {isDark ? '☀️' : '🌙'}
+                </button>
+
                 <div className="notification-menu">
                     <button className="notification-button" onClick={() => setShowNotifications((visible) => !visible)} aria-label="Notifications" aria-expanded={showNotifications}>
                         🔔{unreadCount > 0 && <b>{unreadCount > 9 ? '9+' : unreadCount}</b>}

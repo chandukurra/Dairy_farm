@@ -44,11 +44,15 @@ const Sidebar = () => {
 
                 {user?.role === 'ADMIN' && (
                     <>
-                        <li><NavLink to={`${base}/reports`} className="nav-link text-white">Reports</NavLink></li>
-                        <li><NavLink to={`${base}/verifications`} className="nav-link text-white">Verifications</NavLink></li>
-                        <li><NavLink to={`${base}/attendance`} className="nav-link text-white">Manager Attendance</NavLink></li>
-                        <li><NavLink to={`${base}/users`} className="nav-link text-white">Users & Staff</NavLink></li>
+                        <li><NavLink to={`${base}/reports`} className="nav-link text-white"><span className="nav-icon">📊</span> Reports</NavLink></li>
+                        <li><NavLink to={`${base}/verifications`} className="nav-link text-white"><span className="nav-icon">✓</span> Verifications</NavLink></li>
+                        <li><NavLink to={`${base}/attendance`} className="nav-link text-white"><span className="nav-icon">🕒</span> Manager Attendance</NavLink></li>
+                        <li><NavLink to={`${base}/users`} className="nav-link text-white"><span className="nav-icon">👥</span> Users & Staff</NavLink></li>
                     </>
+                )}
+
+                {(user?.role === 'ADMIN' || user?.role === 'FARM_MANAGER') && (
+                    <li><NavLink to={`${base}/settings`} className="nav-link text-white"><span className="nav-icon">⚙️</span> Settings</NavLink></li>
                 )}
 
                 {user?.role === 'CUSTOMER' && (

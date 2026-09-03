@@ -51,6 +51,7 @@ import InventoryTransactionForm from './pages/inventory/InventoryTransactionForm
 import AnalyticsDashboard from './pages/reports/AnalyticsDashboard';
 import UserList from './pages/admin/UserList';
 import UserForm from './pages/admin/UserForm';
+import Settings from './pages/settings/Settings';
 
 function App() {
   return (
@@ -109,6 +110,7 @@ function App() {
                   <Route path="users" element={<UserList />} />
                   <Route path="users/new" element={<UserForm />} />
                   <Route path="attendance" element={<Attendance />} />
+                  <Route path="settings" element={<Settings />} />
                   
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -155,6 +157,7 @@ function App() {
                   <Route path="inventory" element={<InventoryList />} />
                   <Route path="inventory/new" element={<InventoryItemForm />} />
                   <Route path="inventory/transaction" element={<InventoryTransactionForm />} />
+                  <Route path="settings" element={<Settings />} />
                   
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="dashboard" replace />} />
